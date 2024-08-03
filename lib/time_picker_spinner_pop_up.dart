@@ -40,6 +40,7 @@ class TimePickerSpinnerPopUp extends StatefulWidget {
     this.use24hFormat = true,
     this.locale,
     this.isUseMinTime = false,
+    this.isUseMaxTime = false,
   }) : super(key: key);
 
   /// Type of press to show pop up, default is [PressType.singlePress]
@@ -128,6 +129,8 @@ class TimePickerSpinnerPopUp extends StatefulWidget {
   final Locale? locale;
 
   final bool isUseMinTime;
+
+  final bool isUseMaxTime;
 
   @override
   _TimePickerSpinnerPopUpState createState() => _TimePickerSpinnerPopUpState();
@@ -424,6 +427,7 @@ class _TimePickerSpinnerPopUpState extends State<TimePickerSpinnerPopUp>
                       ),
                       child: CupertinoDatePickerCustom(
                         isUseMinimumDate: widget.isUseMinTime,
+                        isUseMaximumDate: widget.isUseMaxTime,
                         minimumDate: widget.minTime,
                         maximumDate: widget.maxTime,
                         minuteInterval: widget.minuteInterval,

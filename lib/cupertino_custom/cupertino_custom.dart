@@ -300,6 +300,7 @@ class CupertinoDatePickerCustom extends StatefulWidget {
     this.showDayOfWeek = false,
     this.itemExtent = _kItemExtent,
     this.isUseMinimumDate = false,
+    this.isUseMaximumDate = false,
   })  : initialDateTime = initialDateTime ?? DateTime.now(),
         assert(
           itemExtent > 0,
@@ -439,6 +440,9 @@ class CupertinoDatePickerCustom extends StatefulWidget {
 
   /// Whether to use a minimum date of [minimumDate] only if some logic utilizes [maximumDate]. Defaults to false.
   final bool isUseMinimumDate;
+
+  /// Whether to use a maximum date of [maximumDate] only if some logic utilizes [minimumDate]. Defaults to false.
+  final bool isUseMaximumDate;
 
   @override
   State<StatefulWidget> createState() {
@@ -1029,10 +1033,15 @@ class _CupertinoDatePickerDateTimeState
 
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
-      final DateTime targetDate = minCheck || widget.isUseMinimumDate
-          ? widget.minimumDate!
-          : widget.maximumDate!;
-      _scrollToDate(targetDate, selectedDate, minCheck);
+      final DateTime targetDate =
+          minCheck ? widget.minimumDate! : widget.maximumDate!;
+
+      // Override the date if use isUseMinimumDate or use isUseMaximumDate.
+      DateTime? overrideDate;
+      if (widget.isUseMinimumDate) overrideDate = widget.minimumDate;
+      if (widget.isUseMaximumDate) overrideDate = widget.maximumDate;
+
+      _scrollToDate(overrideDate ?? targetDate, selectedDate, minCheck);
     }
   }
 
