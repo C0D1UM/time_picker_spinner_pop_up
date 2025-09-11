@@ -12,9 +12,11 @@ part 'time_picker_spinner_controller.dart';
 
 part 'time_picker_spinner_enum.dart';
 
+
 class TimePickerSpinnerPopUp extends StatefulWidget {
   const TimePickerSpinnerPopUp({
     Key? key,
+    this.routeObserver,
     this.pressType = PressType.singlePress,
     this.controller,
     this.barrierColor = Colors.black12,
@@ -42,6 +44,11 @@ class TimePickerSpinnerPopUp extends StatefulWidget {
     this.isUseMinTime = false,
     this.isUseMaxTime = false,
   }) : super(key: key);
+
+  /// RouteObserver to observe route changes (e.g., push/pop)
+  /// If you want the overlay to close automatically when changing pages,
+  /// please pass the observer used with MaterialApp.
+  final RouteObserver<PageRoute>? routeObserver;
 
   /// Type of press to show pop up, default is [PressType.singlePress]
   final PressType pressType;
@@ -137,7 +144,7 @@ class TimePickerSpinnerPopUp extends StatefulWidget {
 }
 
 class _TimePickerSpinnerPopUpState extends State<TimePickerSpinnerPopUp>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, RouteAware {
   RenderBox? _childBox;
   OverlayEntry? _overlayEntry;
   TimePickerSpinnerController? _controller;
@@ -150,6 +157,34 @@ class _TimePickerSpinnerPopUpState extends State<TimePickerSpinnerPopUp>
   late DateTime _selectedDateTimeSpinner;
 
   double _paddingHorizontal = 20;
+
+  ModalRoute? _modalRoute;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _modalRoute = ModalRoute.of(context);
+    if (widget.routeObserver != null && _modalRoute is PageRoute) {
+      widget.routeObserver!.subscribe(this, _modalRoute as PageRoute);
+    }
+  }
+
+  @override
+  void dispose() {
+    _hideMenu();
+    _controller?.removeListener(_updateView);
+    _animationController.dispose();
+    if (widget.routeObserver != null && _modalRoute is PageRoute) {
+      widget.routeObserver!.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didPushNext() {
+    _hideMenu();
+    super.didPushNext();
+  }
 
   @override
   void initState() {
@@ -175,14 +210,6 @@ class _TimePickerSpinnerPopUpState extends State<TimePickerSpinnerPopUp>
     super.didUpdateWidget(oldWidget);
     _selectedDateTime = widget.initTime ?? DateTime.now();
     _selectedDateTimeSpinner = widget.initTime ?? DateTime.now();
-  }
-
-  @override
-  void dispose() {
-    _hideMenu();
-    _controller?.removeListener(_updateView);
-    _animationController.dispose();
-    super.dispose();
   }
 
   @override
